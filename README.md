@@ -5,7 +5,7 @@ This webpack plugin allows you to compress files into tar, zip and other formats
 ## Usage
 
 ```js
-const ArchiveWebpackPlugin = require('../archive-webpack-plugin');
+const ArchiveWebpackPlugin = require('archive-webpack-plugin');
 
 config.plugins = [
   new ArchiveWebpackPlugin({
