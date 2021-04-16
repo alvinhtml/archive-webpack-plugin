@@ -1,56 +1,58 @@
-// import fs from 'fs';
-// import archiver from 'archiver';
+import fs from 'fs';
+import tarfs from 'tar-fs';
+import zipdir from 'zip-dir';
+import colors from 'colors-console';
 
 class ArchiveWebpackPlugin {
-  constructor(options) {
+  constructor(options = {}) {
+
+    Object.assign({
+      source: 'dist/',
+      destination: 'assets.tar',
+      format: 'tar'
+    }, options);
+
     this.options = options;
   }
 
+  tar() {
+    const {source, destination} = this.options;
+    console.log(`${colors('green', source)} -> ${colors('green', destination)}`);
+    tarfs.pack(source).pipe(fs.createWriteStream(destination));
+  }
+
+  zip() {
+    const {source, destination} = this.options;
+    console.log(`${colors('green', source)} -> ${colors('green', destination)}`);
+    zipdir(source, {saveTo: destination});
+  }
+
+  async start() {
+    const {format} = this.options;
+
+    switch (format) {
+      case 'tar':
+        this.tar();
+        break;
+
+      case 'zip':
+        this.zip();
+        break;
+
+      default:
+      this.tar();
+    }
+  }
+
   apply(compiler) {
-    compiler.hooks.done.tap('ArchiveWebpackPlugin', (compilation, callback) => {
-      console.log("callback", callback);
-      console.log("compilation", compilation);
-      console.log(this.options);
-      // // 创建文件输出流
-      // let output = fs.createWriteStream(__dirname + '/dist.zip');
-      // let archive = archiver('zip', {
-      //   zlib: { level: 9 } // 设置压缩级别
-      // });
-      //
-      // // 文件输出流结束
-      // output.on('close', function() {
-      //   console.log(`总共 ${archive.pointer()} 字节`)
-      //   console.log('archiver 完成文件的归档，文件输出流描述符已关闭')
-      // });
-      //
-      // // 数据源是否耗尽
-      // output.on('end', function() {
-      //   console.log('数据源已耗尽')
-      // });
-      //
-      // // 存档警告
-      // archive.on('warning', function(err) {
-      //   if (err.code === 'ENOENT') {
-      //     console.warn('stat故障和其他非阻塞错误')
-      //   } else {
-      //     throw err
-      //   }
-      // });
-      //
-      // // 存档出错
-      // archive.on('error', function(err) {
-      //   throw err
-      // });
-      //
-      // // 通过管道方法将输出流存档到文件
-      // archive.pipe(output);
-      //
-      // // 从目录追加文件并将其命名为“新子dir”在存档中
-      // archive.directory('dist/', 'static');
-      //
-      // // 完成归档
-      // archive.finalize();
-    });
+    console.log('\nStart compressing...\n');
+    const onEnd = async () => {
+      await this.start();
+      console.log('Compression complete!\n')
+    };
+
+    // 在构建完成后打包
+    compiler.hooks.afterEmit.tapPromise('ArchiveWebpackPlugin', onEnd);
   }
 }
 

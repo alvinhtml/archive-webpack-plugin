@@ -9,7 +9,7 @@ const ASSET_PATH = process.env.ASSET_PATH || '/';
 
 const config = {
   optimization: {
-    minimize: true,
+    minimize: false,
     minimizer: [
       new TerserPlugin({
         terserOptions: {
@@ -24,6 +24,8 @@ const config = {
 
   // 两种模式， production (生产模式) development（开发模式）
   mode: process.env.NODE_ENV,
+
+  target: 'node',
 
   entry: {
     index: './app/scripts/index.js'
@@ -40,19 +42,17 @@ const config = {
   },
 
   resolve: {
-    modules: [path.resolve('node_modules')],
+    modules: ['node_modules'],
     alias: {
       '~': path.resolve(__dirname, './app/scripts/')
     },
     extensions: ['.js'], // 配置省略后缀名
     fallback: {
-      path: require.resolve("path-browserify"),
-      util: require.resolve("util/"),
-      stream: require.resolve("stream-browserify"),
-      zlib: require.resolve("browserify-zlib"),
-      constants: require.resolve("constants-browserify"),
-      assert: require.resolve("assert/"),
-      fs: false,
+      // path: require.resolve("path-browserify"),
+      // constants: require.resolve("constants-browserify"),
+      // assert: require.resolve("assert/"),
+      // os: require.resolve("os-browserify/browser"),
+      // fs: false
     }
   },
 
